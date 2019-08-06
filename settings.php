@@ -28,7 +28,6 @@
                 while ($rr = mysqli_fetch_array($q)) {
                     $_SESSION['user_name'] = $rr['name'];
                 }
-                header('location:https://www.247naijaforum.com/ecommerce/index.php');
             }
         }
     }
@@ -63,7 +62,6 @@
                 @session_start();
                 $_SESSION['account_email'] = $emailaddress;
                 $_SESSION['user_name'] = $name;
-                header('location:https://www.247naijaforum.com/ecommerce/index.php');
     	    }
     	}
     }
