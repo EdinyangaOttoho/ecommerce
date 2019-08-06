@@ -1,5 +1,5 @@
 <?php
-    header('Access-Control-Allow-Origin:https://www.247naijaforum.com');
+    header('Access-Control-Allow-Origin:*');
     header('Access-Control-Allow-Credentials:true');
 ?>
 <?php
