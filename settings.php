@@ -1,329 +1,663 @@
-<html>
-	<head>
-		<link rel="stylesheet" href="css/cart.css">
-		<link rel="shortcut icon" href="images/tshirtshop.png">
-		<link rel="stylesheet" href="css/index.css">
-		<link rel="stylesheet" href="css/product.css">
-		<script src="https://js.paystack.co/v1/inline.js"></script>
-		<meta name="viewport" content="user-scalable=0,initial-scale=0.8,width=device-width">
-		<meta charset="UTF-8">
-		<meta name="description" content="Buy all your desired T-shirts here at affordable costs. You will leave with no regrets after being offered our services">
-		<link rel="stylesheet" href="fontawesome/styles.css">
-		<style>
-             @import url('https://fonts.googleapis.com/css?family=Roboto&display=swap');
-		</style>
-		<script src="fontawesome/all.js"></script>
-		<title>Go Commerce</title>
-	</head>
-	<body onload="fetchData();see()">
-		<button class="slidebar" onclick="slider()"><i class="fas fa-bars"></i></button>
-		<a href="index.php"><img class="logo" src="images/tshirtshop.png"></a>
-		<!-- Menu bar-->
-		<div class="menu">
-			<table class="menu-inner" cellspacing="0" cellpadding="0">
-				<tr>
-					<td class="to-hide">
-						<a href="index.php"><button class="tiny"><i class="fas fa-shopping-cart"></i></button></a>
-					</td>
-					<?php
-						@session_start();
-						if (!isset($_SESSION['account_email'])) { ?>
-							<td class="to-hide">
-								<a href="login.php"><button class="tiny">Login</button></a>
-							</td>
-							<td class="to-hide">
-								<a href="register.php"><button class="tiny">Register</button></a>
-							</td>	
-						<?php
-						}
-						else { ?>
-							<td>
-								<a href="requests.php?logout=true"><button class="tiny to-hide">Sign Out, <?php echo $_SESSION['user_name']; ?></button></a>
-						    </td>
-						    <td>
-								<a href="options.php"><button class="tiny to-hide">Options</button></a>
-						    </td>
-						<?php
-						}
-					?>
-				</tr>
-			</table>
-		</div>
-		<!--Body -->
-		<div id="body">
-		    <div class="shopping-area">
-		    	<center>
-			    		<div class="left-bar to-hide">
-			    			<br/>
-			    			<i class="fas fa-search"></i> <input type="text" class="search-input" style="margin-left:5px" oninput="searchnow(this.value)">
-			    			<br/>
-			    			<br/>
-			    			<br/>
-	    					<label class="headings">Departments</label>
-	    					<div id="departments">
-	    						<hr/>
-	    						<br/>
-	    						<?php
-	    							$host = 'localhost';
-	    							$user = 'naijafo7_root';
-	    							$password = 'danielpatrick';
-	    							$database = 'naijafo7_dstore';
-	    							$db = mysqli_connect($host,$user,$password,$database);
-	    							$q = mysqli_query($db,"SELECT * FROM department");
-	    							while ($r = mysqli_fetch_array($q)) { ?>
-	    								 <label class="captions" onclick="dep(<?php echo $r['department_id']; ?>)"><?php echo $r['name']; ?></label>
-	    								 <br/>
-	    								 <br/>	
-	    							<?php
-	    							}
-	    						?>
-		    					<br/>
-		    				</div>
-		    				<div id="category"></div>
-			    		</div>
-			    		<div class="right-bar">
-	    					<center><label class="headings">Products</label></center>
-	    					<hr/>
-	    					<div id ="navigator">
-		    					<button class="arrow" onclick="reduce()">
-		    						<i class="fas fa-arrow-alt-circle-left"></i>
-		    					</button>
-		    					<button class="click" id="x1" onclick="getOffset(1)">1</button>
-		    					<button class="click" id="x2" onclick="getOffset(10)">2</button>
-		    					<button class="click" id="x3" onclick="getOffset(20)">3</button>
-		    					<button class="click" id="x4" onclick="getOffset(30)">4</button>
-		    					<button class="click" id="x5" onclick="getOffset(40)">5</button>
-		    					<button class="click" id="x6" onclick="getOffset(50)">6</button>
-		    					<button class="click" id="x7" onclick="getOffset(60)">7</button>
-		    					<button class="click" id="x8" onclick="getOffset(70)">8</button>
-		    					<button class="click" id="x9" onclick="getOffset(80)">9</button>
-		    					<button class="click" id="x10" onclick="getOffset(90)">10</button>
-		    					<button class="click" id="x11" onclick="getOffset(100)">11</button>
-		    					<button class="arrow" onclick="increase()">
-		    						<i class="fas fa-arrow-alt-circle-right"></i>
-		    					</button>
-		    					<div class="numeration">
-		    						101 total
-		    					</div>
-	    					</div>
-	    					<br/>
-	    					<div id="products" style="width:100%">
+<?php
+/*This is the overall site configuration. It conducts all the Database and back-end validation/SQL */
+    header('Access-Control-Allow-Origin:https://www.247naijaforum.com/ecommerce/*'); //Sets the CORS header
+    header('Access-Control-Allow-Credentials:true');
+?>
+<?php
+	include 'requests.php'; //Includes the request processing page
+    class SignIn {
+    	public $email = '';
+        public $pass = '';
+        public function __construct($em,$pass) {
+            $this->email = $em;
+            $this->pass = $pass;
+            $host = 'localhost';
+            $user = 'naijafo7_root';
+            $dbpassword = 'danielpatrick';
+            $database = 'naijafo7_dstore';
+            $db = mysqli_connect($host,$user,$dbpassword,$database);
+            $password = hexdec(stripslashes(htmlspecialchars(trim(mysqli_real_escape_string($db,$this->pass))))); //Escaping XSS and SQLInjection
+            $emailaddress = stripslashes(htmlspecialchars(trim(mysqli_real_escape_string($db,$this->email)))); //Escaping XSS and SQLInjection
+            $query = "SELECT * FROM customer WHERE email = '$emailaddress' AND password = '$password'";
+            $q = mysqli_query($db,$query);
+            if (mysqli_num_rows($q) == 0) {
+                echo 'error';
+            }
+            else {
+                @session_start();
+                $_SESSION['account_email'] = $emailaddress; //Creates the Sessions of user account
+                while ($rr = mysqli_fetch_array($q)) {
+                    $_SESSION['user_name'] = $rr['name'];
+                }
+            }
+        }
+    }
+    class SignUp {
+    	public $email = '';
+		public $password = 'danielpatrick';
+		public $firstname = '';
+		public $lastname = '';
+		public function __construct($em,$pass,$firstname,$lastname) {
+			$this->email = $em;
+    		$this->password = $pass;
+    		$this->firstname = $firstname;
+    		$this->lastname = $lastname;
+    		$host = 'localhost';
+			$user = 'naijafo7_root';
+			$dbpassword = 'danielpatrick';
+			$database = 'naijafo7_dstore';
+			$db = mysqli_connect($host,$user,$dbpassword,$database);
+    		$password = hexdec(stripslashes(htmlspecialchars(trim(mysqli_real_escape_string($db,$this->password))))); //Escaping XSS and SQLInjection
+    		$emailaddress = stripslashes(htmlspecialchars(trim(mysqli_real_escape_string($db,$this->email)))); //Escaping XSS and SQLInjection
+    		$firstname = stripslashes(htmlspecialchars(trim(mysqli_real_escape_string($db,$this->firstname)))); //Escaping XSS and SQLInjection
+    		$lastname = stripslashes(htmlspecialchars(trim(mysqli_real_escape_string($db,$this->lastname)))); //Escaping XSS and SQLInjection
+    		$name = $firstname." ".$lastname;
+    		$query = "SELECT * FROM customer WHERE email = '$emailaddress'";
+    		$q = mysqli_query($db,$query);
+            $cnt = mysqli_num_rows($q) + 1 + mt_rand(0,65535);
+    	    if (mysqli_num_rows($q) >= 1) {
+    	    	echo 'error';
+    	    }
+     	    else {
+                mysqli_query($db,"INSERT INTO customer (name,email,password,credit_card,address_1,address_2,city,region,postal_code,country,shipping_region_id,day_phone,eve_phone,mob_phone) VALUES ('$name','$emailaddress','$password','','','','','','','','$cnt','','','')");
+                @session_start();
+                $_SESSION['account_email'] = $emailaddress;
+                $_SESSION['user_name'] = $name;
+    	    }
+    	}
+    }
+    class FetchSales {
+        public $off = '';
+        public function __construct($off,$cat,$dep) {
+            $this->off =$off;
+            $this->cat = $cat;
+            $this->dep = $dep;
+            if ($this->dep != 'default' && $this->cat == 'default') { //Fetches by the Department filter
+                $host = 'localhost';
+                $user = 'naijafo7_root';
+                $dbpassword = 'danielpatrick';
+                $database = 'naijafo7_dstore';    
+                $db = mysqli_connect($host,$user,$dbpassword,$database);
+                $q = mysqli_query($db,"SELECT *  FROM category WHERE department_id = '$this->dep'");
+                while ($r = mysqli_fetch_array($q)) {
+                    $pid = $r['category_id'];
+                    $qs = mysqli_query($db, "SELECT * FROM product_category WHERE category_id = '$pid'");
+                    $cid = '';
+                    while ($rq = mysqli_fetch_array($qs)) {
+                        $cid = $rq['product_id'];
+                        $qq = mysqli_query($db,"SELECT * FROM product WHERE product_id = '$cid'");
+                        while ($rr = mysqli_fetch_array($qq)) {
+                            $img = $rr['image'];
+                            ?>
+                            <div class="product-tile">
+                                <img src="<?php echo $img; ?>" class="fill">
+                                <br/>
+                                <br/>
+                                <center>
+                                    <label class="name"><?php echo $rr['name']; ?></label>
+                                    <br/>
+                                    <br/>
+                                    <?php
+                                        if ($rr['discounted_price'] == '0.00') {?>
+                                            <label style="font-family:'GothamRounded';color:hotpink">FREE</label>
+                                            <br/>
+                                            <br/>
+                                        <?php
+                                        }
+                                        else { ?>
+                                             <label class="price">$<?php echo $rr['discounted_price']; ?></label>
+                                             <br/>
+                                             <strike><label class="price"><?php echo $rr['price']; ?></label></strike>
+                                             <br/>
+                                             <br/>
+                                        <?php
+                                        }
+                                        @session_start();
+                                        if (isset($_SESSION['account_email'])) { ?>
+                                            <center><button class="buy-now" id="<?php echo $rq['product_id']; ?>" onclick="buynow(this.id)">Buy Now</button></center>
+                                            <p align="right">
+                                                <label class="little cart" id="<?php echo $rq['product_id']; ?>" onclick="addcart(this.id)"><i class="fas fa-shopping-cart"></i> Add to Cart</label>
+                                            </p>
+                                        <?php
+                                        }
+                                    ?>
+                                </center>
+                                </center>
+                            </div>
+                    <?php
+                            }
+                    }
+                } 
+            }
+            elseif ($this->cat != 'default' && $this->dep == 'default') { //Filters by the Category
+                $host = 'localhost';
+                $user = 'naijafo7_root';
+                $dbpassword = 'danielpatrick';
+                $database = 'naijafo7_dstore';    
+                $db = mysqli_connect($host,$user,$dbpassword,$database);
+                $qs = mysqli_query($db, "SELECT * FROM product_category WHERE category_id = '$this->cat' ORDER BY category_id");
+                    while ($rq = mysqli_fetch_array($qs)) {
+                        $cid = $rq['product_id'];
+                        $qq = mysqli_query($db,"SELECT * FROM product WHERE product_id = '$cid'");
+                        while ($rr = mysqli_fetch_array($qq)) {
+                            $img = $rr['image'];
+                            ?>
+                            <div class="product-tile">
+                                <img src="<?php echo $img; ?>" class="fill">
+                                <br/>
+                                <br/>
+                                <center>
+                                    <label class="name"><?php echo $rr['name']; ?></label>
+                                    <br/>
+                                    <br/>
+                                    <?php
+                                        if ($rr['discounted_price'] == '0.00') {?>
+                                            <label style="font-family:'GothamRounded';color:hotpink">FREE</label>
+                                            <br/>
+                                            <br/>
+                                        <?php
+                                        }
+                                        else { ?>
+                                             <label class="price">$<?php echo $rr['discounted_price']; ?></label>
+                                             <br/>
+                                             <strike><label class="price"><?php echo $rr['price']; ?></label></strike>
+                                             <br/>
+                                             <br/>
+                                        <?php
+                                        }
+                                        @session_start();
+                                        if (isset($_SESSION['account_email'])) { ?>
+                                            <center><button class="buy-now" id="<?php echo $rq['product_id']; ?>" onclick="buynow(this.id)">Buy Now</button></center>
+                                            <p align="right">
+                                                <label class="little cart" id="<?php echo $rq['product_id']; ?>" onclick="addcart(this.id)"><i class="fas fa-shopping-cart"></i> Add to Cart</label>
+                                            </p>
+                                        <?php
+                                        }
+                                    ?>
+                                </center>
+                                </center>
+                            </div>
+                    <?php
+                            }
+                    }
+            }
+            else { //Default product Fetch
+                $host = 'localhost';
+                $user = 'naijafo7_root';
+                $dbpassword = 'danielpatrick';
+                $database = 'naijafo7_dstore';
+                $db = mysqli_connect($host,$user,$dbpassword,$database);
+                $q = mysqli_query($db,"SELECT * FROM product ORDER BY product_id DESC LIMIT $this->off,9");
+                while ($r = mysqli_fetch_array($q)) {
+                    $img = $r['image'];
+                ?>
+                <div class="product-tile">
+                    <img src="<?php echo $img; ?>" class="fill">
+                    <br/>
+                    <br/>
+                    <center>
+                        <label class="name"><?php echo $r['name']; ?></label>
+                        <br/>
+                        <br/>
+                        <?php
+                            if ($r['discounted_price'] == '0.00') {?>
+                                <label style="font-family:'GothamRounded';color:hotpink">FREE</label>
+                                <br/>
+                                <br/>
+                            <?php
+                            }
+                            else { ?>
+                                 <label class="price">$<?php echo $r['discounted_price']; ?></label>
+                                 <br/>
+                                 <strike><label class="price"><?php echo $r['price']; ?></label></strike>
+                                 <br/>
+                                 <br/>
+                            <?php
+                            }
+                            @session_start();
+                            if (isset($_SESSION['account_email'])) { ?>
+                                <center><button class="buy-now" id="<?php echo $r['product_id']; ?>" onclick="buynow(this.id)">Buy Now</button></center>
+                                <p align="right">
+                                    <label class="little cart" id="<?php echo $r['product_id']; ?>" onclick="addcart(this.id)"><i class="fas fa-shopping-cart"></i> Add to Cart</label>
+                                </p>
+                            <?php
+                            }
+                        ?>
+                    </center>
+                    </center>
+                </div>
+                <?php
+                }
+            }
+        }
+    }
+    class AddToCart {
+        public $id = '';
+        public function __construct($id) {
+            $this->id = $id;
+            $id =$this->id;
+            $host = 'localhost';
+            $user = 'naijafo7_root';
+            $password = 'danielpatrick';
+            $database = 'naijafo7_dstore';
+            $id = $this->id;
+            $db = mysqli_connect($host,$user,$password,$database);
+            @session_start();
+            $em = $_SESSION['account_email'];
+            $y = date('Y');
+            $m = date('M');
+            $d = date('d');
+            $h = date('h');
+            $m = date('i');
+            $s = date('s');
+            $a = date('A');
+            $dt = $d.', '.$m.', '.$y. '  '.$h.':'.$m.':'.$s.' '.$a. ' WAT';
+            $qq = mysqli_query($db,"SELECT * FROM shopping_cart WHERE product_id = '$id' AND cart_id = '$em' ORDER BY product_id");
+            if (mysqli_num_rows($qq) >= 1) {
+                echo 'error';
+            }
+            else {
+                $q = mysqli_query($db,"INSERT INTO shopping_cart (cart_id,product_id,attributes,added_on) VALUES ('$em','$id','0','$dt')");
+                $qr = mysqli_query($db,"SELECT * FROM shopping_cart WHERE cart_id = '$em'");
+                $cnt = mysqli_num_rows($qr);?>
+                <script>
+                    var cartnum = <?php echo $cnt; ?>;
+                </script>
+                <?php
+                if ($cnt >= 0) { ?>
+                <?php
+                }
+                while ($r = mysqli_fetch_array($qr)) { ?>
+                    <div class="cart-text">
+                        <table style="width:100%">
+                            <tr>
+                                <td style="width:70%">
+                                    <?php 
+                                        $id = $r['product_id'];
+                                        $q2 = mysqli_query($db, "SELECT * FROM product WHERE product_id = '$id'");
+                                        $name = '';
+                                        $price = '';
+                                        while ($r2 = mysqli_fetch_array($q2)) {
+                                            $name = $r2['name'];
+                                            $price = $r2['discounted_price'];
+                                        }?>
+                                        <center style="text-align:left;font-family:'GothamRounded'"><?php echo $name; ?></center>
+                                    <?php
+                                    ?>
+                                </td>
+                                <td>
+                                    <center style="font-family:'Roboto'" class="tag"><?php
+                                                    if ($price == '0.00') {
+                                                        echo 'FREE';
+                                                    }
+                                                    else {
+                                                        echo '$'.$price;    
+                                                    }
+                                                     ?></center>
+                                    </td>
+                                        <td style="width:14px">
+                                            <button class="close ids" onclick="remelem(this.id)" id="<?php echo $id; ?>">&times;</button>
+                                    </td>
+                            </tr>
+                        </table>
+                    </div>
+                <?php
+                }
+                $cn = mysqli_num_rows($qr);
+                if ($cn == 0) {
+                    echo '<center style="font-family:\'GothamRounded\'">Nothing to display here</center>||||0';
+                }
+                else {
+                    echo '<br/>
+                <br/>
+                        <center><button class="buy-now" onclick="checkbuy()">View Details</button></center>||||'.mysqli_num_rows($qr);
+                }
+            }
+       }
+    }
+     class RemoveFromCart {
+        public $id = '';
+        public function __construct($id) {
+            $this->id = $id;
+            $id =$this->id;
+            $host = 'localhost';
+            $user = 'naijafo7_root';
+            $password = 'danielpatrick';
+            $database = 'naijafo7_dstore';
+            $id = $this->id;
+            $db = mysqli_connect($host,$user,$password,$database);
+            @session_start();
+            $em = $_SESSION['account_email'];
+            $y = date('Y');
+            $m = date('M');
+            $d = date('d');
+            $h = date('h');
+            $m = date('i');
+            $s = date('s');
+            $a = date('A');
+            $dt = $d.', '.$m.', '.$y. '  '.$h.':'.$m.':'.$s.' '.$a;
+            $q = mysqli_query($db,"DELETE FROM shopping_cart WHERE product_id = '$id' AND cart_id='$em'");
+            $qr = mysqli_query($db,"SELECT * FROM shopping_cart WHERE cart_id = '$em'");
+            $cnt = mysqli_num_rows($qr);?>
+            <script>
+                var cartnum = <?php echo $cnt; ?>;
+            </script>
+            <?php
+            if ($cnt >= 0) { ?>
+            <?php
+            }
+            while ($r = mysqli_fetch_array($qr)) { ?>
+                <div class="cart-text">
+                    <table style="width:100%">
+                        <tr>
+                            <td style="width:80%">
+                                <?php 
+                                    $id = $r['product_id'];
+                                    $q2 = mysqli_query($db, "SELECT * FROM product WHERE product_id = '$id'");
+                                    $name = '';
+                                    $price = '';
+                                    while ($r2 = mysqli_fetch_array($q2)) {
+                                        $name = $r2['name'];
+                                        $price = $r2['discounted_price'];
+                                    }?>
+                                    <center style="text-align:left;font-family:'GothamRounded'"><?php echo $name; ?></center>
+                                <?php
+                                ?>
+                            </td>
+                            <td>
+                                <center style="font-family:'Roboto'" class="tag"><?php
+                                                    if ($price == '0.00') {
+                                                        echo 'FREE';
+                                                    }
+                                                    else {
+                                                        echo '$'.$price;    
+                                                    }
+                                                     ?></center>
+                                </td>
+                                    <td style="width:14px">
+                                        <button class="close ids" onclick="remelem(this.id)" id="<?php echo $id; ?>">&times;</button>
+                                </td>
+                        </tr>
+                    </table>
+                </div>
+            <?php
+            }
+            $cn = mysqli_num_rows($qr);
+            if ($cn == 0) {
+                echo '<center style="font-family:\'GothamRounded\'">Nothing to display here</center>||||0';
+            }
+            else {
+                echo '<br/>
+            <br/>
+                    <center><button class="buy-now" onclick="checkbuy()">View Details</button></center>||||'.mysqli_num_rows($qr);
+            }
+       }
+    }
+    class PrintArray { //This takes the Array of the Cashout Details
+        public $arr = '';
+        function __construct($arr) {
+            $this->arr =  $arr;
+            $spl = explode(',',$this->arr);
+            $cnt = 0;
+            $total = 0;
+            ?>
+            <p align="right">
+                <button class="close" onclick="_('view-details').style.display = 'none';">&times;</button>
+            </p>
+            <?php
+            foreach ($spl as $i) {
+                $cnt++;
+                $host = 'localhost';
+                $user = 'naijafo7_root';
+                $password = 'danielpatrick';
+                $database = 'naijafo7_dstore';
+                $db = mysqli_connect($host,$user,$password,$database);
+                $q = mysqli_query($db, "SELECT * FROM product WHERE product_id = '$i'");
+                $bigimage = '';
+                $name = '';
+                $description = '';
+                $price = '';
+                while ($r = mysqli_fetch_array($q)) {
+                    $bigimage = $r['image'];
+                    $price = $r['discounted_price'];
+                    $name = $r['name'];
+                    $smallimage = $r['image_2'];
+                    $description = $r['description'];
+                    $total = $total + floatval($r['discounted_price']);
+                }
+                ?>
+                <table style="width:100%">
+                    <tr>
+                        <td class="img-holder">
+                            <div style="width:100%">
+                                <img src="<?php echo $bigimage; ?>" class="pics" style="height:300px" alt="<?php echo $smallimage; ?>" onmouseover="this.src=this.alt" onmouseout="this.src='<?php echo $bigimage; ?>'">
+                            </div>
+                        </td>
+                         <td>
+                            <div class="innertext">
+                                <label class="title-top"><?php echo $name; ?></label>
+                                <br/>
+                                <br/>
+                                <div class="desc"><?php echo $description; ?></div>
+                                <h3>
+                                    <div id="xx<?php echo $cnt; ?>" class="price-tags">
+                                        <?php
+                                            if ($price == '0.00') {
+                                                echo 'FREE';
+                                            }
+                                            else {
+                                                echo '$'.$price;
+                                            }
+                                        ?>
+                                    </div>
+                                </h3>
+                                    <label class="quant">Quantity</label>
+                                    <br/>
+                                    <div >
+                                          <select id="yy<?php echo $cnt; ?>" class="sele" onchange="upprice(this.id)">
+                                              <option>1</option>
+                                              <option>2</option>
+                                              <option>3</option>
+                                              <option>4</option>
+                                              <option>5</option>
+                                              <option>6</option>
+                                              <option>7</option>
+                                              <option>8</option>
+                                              <option>9</option>
+                                              <option>10</option>
+                                              <option>11</option>
+                                              <option>12</option>
+                                              <option>13</option>
+                                              <option>14</option>
+                                              <option>15</option>
+                                              <option>16</option>
+                                              <option>17</option>
+                                              <option>18</option>
+                                              <option>19</option>
+                                              <option>20</option>
+                                          </select>
+                                    </div>
+                                    <input type="hidden" id="zz<?php echo $cnt; ?>" value="<?php echo $price; ?>"></div>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+                <?php
+            }
+            echo '<br/><br/><label id="total">Total: $'. $total .'</label><br/>
+            <br/>
+            <br/>';?>
+            <button class="buy-now" id="checktotal" onclick="totalbuy(<?php echo $total; ?>)">Checkout</button><br/><br/><br/>
+            <?php
+        }
+    }
+    class fetchPrice { //Fetches the Product prices gievn the ID
+        public $id = '';
+        public function __construct($id) {
+            $this->id = $id;
+            $id =  $this->id;
+            $db = mysqli_connect('localhost','naijafo7_root','danielpatrick','naijafo7_dstore');
+            $q = mysqli_query($db, "SELECT discounted_price FROM product WHERE product_id = '$id'");
+            $price='';
+            while ($r = mysqli_fetch_array($q)) {
+                 $price = $r['discounted_price'];
+            }
+            echo $price;
+        }
+    }
+    class SuccessfulPayment { //Validates Payment and adds details to orders table
+        public $price = '';
+        public $ref = '';
+        function __construct($paid,$ref) {
+            $this->price = $paid;
+            $this->ref = $ref;
+            $ref = $this->ref;
+            $paid = $this->price;
+            $host = 'localhost';
+            $user = 'naijafo7_root';
+            $password = 'danielpatrick';
+            $database = 'naijafo7_dstore';
+            @session_start();
+            $em = $_SESSION['account_email'];
+            $db = mysqli_connect($host,$user,$password,$database);
+            $q = mysqli_query($db,"SELECT * FROM customer WHERE email = '$em'");
+            while ($r = mysqli_fetch_array($q)) {
+                $custid = $r['email'];
+            }
+            $y = date('Y');
+            $m = date('M');
+            $d = date('d');
+            $dt = $d.', '.$m.', '.$y. ' WAT';
+            mysqli_query($db,"DELETE FROM shopping_cart WHERE cart_id = '$em'");
+            mysqli_query($db,"INSERT INTO orders (created_on,price,shipped_on,status,customer_id,reference,shipping_id,nation,delivery_date,charge) VALUES ('$dt','$paid','Pending','Pending','$custid','$ref','Pending','Pending','Pending','Pending')") or error_log(mysqli_error($db));
+        }
+    }
+    class ShippingUpdate {
+        public $id;
+        public $nation;
+        public $shippind_id;
+        public $type;
+        public function __construct($id,$nation,$shipping_id,$type) {
+            $this->id = $id;
+            $this->type = $type;
+            $this->shipping_id = $shipping_id;
+            $host = 'localhost';
+            $user = 'naijafo7_root';
+            $password = 'danielpatrick';
+            $database = 'naijafo7_dstore';
+            $region = '';
+            $db = mysqli_connect($host,$user,$password,$database);
+            $this->nation = htmlspecialchars(mysqli_real_escape_string($db,$nation));
+            $cost = '';
+            $delivery_date = '';
+            $typeid = '';
+            $q = mysqli_query($db, "SELECT shipping_id,shipping_cost FROM shipping WHERE shipping_region_id = '$this->shipping_id' AND shipping_type = '$this->type'");
+            while ($r = mysqli_fetch_array($q)) {
+                $cost = $r['shipping_cost'];
+                $typeid = $r['shipping_id'];
+            }
+            if ($typeid == '1') {
+                $cost = '$20';
+                $dat = date('d-m-Y',strtotime('+1day'));
+                $delivery_date = $dat. ' WAT';
+            }
+            else if ($typeid == '2') {
+                $cost = '$10';
+                $dat = date('d-m-Y',strtotime('+4days'));
+                $delivery_date = $dat. ' WAT';
+            }
+            else if ($typeid == '3') {
+                $cost = '$5';
+                $dat = date('d-m-Y',strtotime('+7days'));
+                $delivery_date = $dat. ' WAT';
+            }
+            else if ($typeid == '4') {
+                $cost = '$25';
+                $dat = date('d-m-Y',strtotime('+7days'));
+                $delivery_date = $dat. ' WAT';
+            }
+            else if ($typeid == '5') {
+                $cost = '$10';
+                $dat = date('d-m-Y',strtotime('+28days'));
+                $delivery_date = $dat. ' WAT';
+            }
+            else if ($typeid == '6') {
+                $cost = '$35';
+                $dat = date('d-m-Y',strtotime('+10days'));
+                $delivery_date = $dat. ' WAT';
+            }
+            else {
+                $cost = '$30';
+                $dat = date('d-m-Y',strtotime('+28days'));
+                $delivery_date = $dat. ' WAT';
+            }
+            @session_start();
+            $em = $_SESSION['account_email'];
+            mysqli_query($db, "UPDATE orders SET status = 'progress' WHERE customer_id = '$em' AND order_id = '$this->id'");
+            mysqli_query($db, "UPDATE orders SET shipping_id = '$shipping_id' WHERE customer_id = '$em' AND order_id = '$this->id'");
+            mysqli_query($db, "UPDATE orders SET nation = '$nation' WHERE customer_id = '$em' AND order_id = '$this->id'");
+            mysqli_query($db, "UPDATE orders SET delivery_date = '$delivery_date' WHERE customer_id = '$em' AND order_id = '$this->id'");
+            mysqli_query($db, "UPDATE orders SET charge = '$cost' WHERE customer_id = '$em' AND order_id = '$this->id'");
+        }
+    }
+    class SearchProduct { //Handles searches
+        public $qstr = '';
+        public function __construct($qstr) {
+            $this->qstr = $qstr;
+            $host = 'localhost';
+            $user = 'naijafo7_root';
+            $password = 'danielpatrick';
+            $database = 'naijafo7_dstore';
+            $db = mysqli_connect($host,$user,$password,$database);
+            $qstr = htmlspecialchars(mysqli_real_escape_string($db,$this->qstr));
+            $q = mysqli_query($db, "SELECT * FROM product WHERE name LIKE '%$qstr%'");
+            while ($r = mysqli_fetch_array($q)) {
+            $img = $r['image'];
+            ?>
+            <div class="product-tile">
+                <img src="<?php echo $img; ?>" class="fill">
+                <br/>
+                <br/>
+                <center>
+                    <label class="name"><?php echo $r['name']; ?></label>
+                    <br/>
+                    <br/>
+                    <?php
+                        if ($r['discounted_price'] == '0.00') {?>
+                            <label style="font-family:'GothamRounded';color:hotpink">FREE</label>
+                            <br/>
+                            <br/>
+                        <?php
+                        }
+                        else { ?>
+                             <label class="price">$<?php echo $r['discounted_price']; ?></label>
+                             <br/>
+                             <strike><label class="price"><?php echo $r['price']; ?></label></strike>
+                             <br/>
+                             <br/>
+                        <?php
+                        }
+                        @session_start();
+                        if (isset($_SESSION['account_email'])) { ?>
+                            <center><button class="buy-now" id="<?php echo $r['product_id']; ?>" onclick="buynow(this.id)">Buy Now</button></center>
+                            <p align="right">
+                                <label class="little cart" id="<?php echo $r['product_id']; ?>" onclick="addcart(this.id)"><i class="fas fa-shopping-cart"></i> Add to Cart</label>
+                            </p>
+                        <?php
+                        }
+                    ?>
+                </center>
+                </center>
+            </div>
+    <?php
+            }
+            $cnt = mysqli_num_rows($q);
+            if ($cnt >=1) {
 
-	    					</div>
-	    					<br/>
-	    					<br/>
-			    		</div>
-		    	</center>
-		    </div>
-		    <!-- Footer -->
-			<div class="foot">
-					<center>
-						<table class="footer-float">
-							<tr>
-								<td >
-										<h3>Questions?</h3>
-										<a href="">Help</a>
-										<br/>
-										<br/>
-										<a href="">Track Order</a>
-										<br/>
-										<br/>
-										<a href="">Returns</a>
-										<br/>
-										<br/>
-										<br/>
-								</td>
-							</tr>
-						</table>
-						<table class="footer-float">
-							<tr>
-								<td >
-									<h3>What's In Store?</h3>
-										<a href="">Women</a>
-										<br/>
-										<br/>
-										<a href="">Men</a>
-										<br/>
-										<br/>
-										<a href="">Products A-Z</a>
-										<br/>
-										<br/>
-										<a href="">Buy Gift Voucher</a>
-								</td>
-							</tr>
-						</table>
-						<table class="footer-float">
-							<tr>
-								<td >
-										<h3>Follow Us</h3>
-										<a href=""><i class="fab fa-facebook"></i> Facebook</a>
-										<br/>
-										<br/>
-										<a href=""><i class="fab fa-twitter"></i>Twitter</a>
-										<br/>
-										<br/>
-										<a href=""><i class="fab fa-youtube"></i>Youtube</a>
-										<br/>
-										<br/>
-										<br/>
-								</td>
-							</tr>
-						</table>
-					<div class="alt-footer">
-						<center>&copy; 2019 Tshirt Stores</center>
-					</div>
-					</center>
-				</div>
-			<script src="js/index.js"></script>
-			<script src="js/fetch.js"></script>
-			<div id="error"></div>
-		</div>
-		<div class="slideout">
-				<p align="right"><button class="close" onclick="slider()">&times;</button></p>
-				<br/>
-				<br/>
-				<a href="index.php"><i class="fas fa-home"></i> Home</a>
-				<br/>
-				<br/>
-				<br/>
-				<?php
-						@session_start();
-						if (!isset($_SESSION['account_email'])) { ?>
-							<a href="register.php"><i class="fas fa-pencil-alt"></i> Register</a>
-							<br/>
-							<br/>
-							<br/>
-							<a href="login.php"><i class="fas fa-user"></i> Login</a>
-							<br/>
-							<br/>
-							<br/>
-						<?php
-						}
-						else { ?>
-							<a href="requests.php?logout=true"><i class="fas fa-sign-out-alt"></i> Sign Out, <?php echo $_SESSION['user_name']; ?></a>
-							<br/>
-							<br/>
-							<br/>
-							<a href="options.php"><i class="fas fa-cog"></i> Options</a>
-							<br/>
-							<br/>
-						<?php
-						}
-					?>
-				<center>
-					<table style="width:95%">
-						<tr>
-							<td style="width:20px">
-								<i class="fas fa-search" oninput="searchnow(this.value)"></i>
-							</td>
-							<td>
-								<input type="text" class="input" style="width:100%">
-							</td>
-						</tr>
-					</table>
-			    </center>
-			</div>
-			<?php
-					@session_start();
-					if (isset($_SESSION['account_email'])) { ?>
-						<button class="cart-button" onclick="discart()">
-							<i class="fas fa-shopping-cart"></i>
-						</button>
-					<?php
-					}
-			?>
-			<div class="big-cart" id="shopcart">
-				<div style="height:100%;overflow:auto;width:100%">
-					<div class="checkout-inner">
-					<?php
-					    $number = 0;
-						$host = 'localhost';
-			            $user = 'naijafo7_root';
-			            $password = 'danielpatrick';
-			            $database = 'naijafo7_dstore';
-			            $db = mysqli_connect($host,$user,$password,$database);
-			            @session_start();
-			            $em = $_SESSION['account_email'];
-			            $q = mysqli_query($db,"SELECT * FROM shopping_cart WHERE cart_id = '$em'");
-			            $number = mysqli_num_rows($q);
-			            $cnt = mysqli_num_rows($q);?>
-			            <script>
-			            	var cartnum = <?php echo $cnt; ?>;
-			            </script>
-			            <?php
-			            if ($cnt >= 0) { ?>
-			            <?php
-			            }
-			            while ($r = mysqli_fetch_array($q)) { ?>
-			            	<div class="cart-text">
-			            		<table style="width:100%">
-			            			<tr>
-			            				<td style="width:80%">
-			            					<?php 
-			            					    $id = $r['product_id'];
-			            					    $q2 = mysqli_query($db, "SELECT * FROM product WHERE product_id = '$id'");
-			            					    $name = '';
-			            					    $price = '';
-			            					    while ($r2 = mysqli_fetch_array($q2)) {
-			            					    	$name = $r2['name'];
-			            					    	$price = $r2['discounted_price'];
-			            					    }?>
-			            					    <center style="text-align:left;font-family:'GothamRounded'"><?php echo $name; ?></center>
-			            					<?php
-			            					?>
-			            				</td>
-			            				<td>
-			            					<center style="font-family:'Roboto'" class="tag">
-			            						<?php
-			            						 	if ($price == '0.00') {
-			            						 		echo 'FREE';
-			            						 	}
-			            						 	else {
-			            						 		echo '$'.$price;	
-			            						 	}
-			            							 ?>
-			            						</center>
-			            				</td>
-			            				<td style="width:14px">
-			            					<button class="close ids" onclick="remelem(this.id)" id="<?php echo $id; ?>">&times;</button>
-			            				</td>
-			            			</tr>
-			            		</table>
-			            	</div>
-			            <?php	
-			            }
-			            $cn = mysqli_num_rows($q);
-			            if ($cn == 0) {
-			                echo '<br/><center style="font-family:\'GothamRounded\'">Nothing to display here</center>';
-			            }
-			            else {
-			                echo '<br/>
-			            <br/>
-			                    <center><button class="buy-now" onclick="checkbuy()">View Details</button></center>';
-			            }
-					?>
-				</div>
-			</div>
-			</table>
-			</div>
-	</body>
-	<?php
-		if (isset($_SESSION['account_email'])) { ?>
-			<button id="num-cart"><?php echo $number; ?></button>
-		<?php
-		}
-	?>
-	<div class="payment" id="payment">
-		 
-	</div>
-	<div class="view-details" id="view-details">
-		<center>
-			 <div id="inner">
-			 	
-			 </div>
-		</center>
-	</div>
-	<script src="js/cart.js"></script>
-	<script src="js/pay.js"></script>
-	<script src="js/product.js"></script>
-</html>
+            }
+            else {
+                echo '<center style="font-family:\'GothamRounded\'">No result(s) found from your input...</center>';
+            }
+        }
+    }
+?>
