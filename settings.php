@@ -1,10 +1,9 @@
 <?php
-/*This is the overall site configuration. It conducts all the Database and back-end validation/SQL */
-    header('Access-Control-Allow-Origin:https://www.247naijaforum.com/ecommerce/*'); //Sets the CORS header
+    header('Access-Control-Allow-Origin:*');
     header('Access-Control-Allow-Credentials:true');
 ?>
 <?php
-	include 'requests.php'; //Includes the request processing page
+	include 'requests.php';
     class SignIn {
     	public $email = '';
         public $pass = '';
@@ -16,8 +15,8 @@
             $dbpassword = 'danielpatrick';
             $database = 'naijafo7_dstore';
             $db = mysqli_connect($host,$user,$dbpassword,$database);
-            $password = hexdec(stripslashes(htmlspecialchars(trim(mysqli_real_escape_string($db,$this->pass))))); //Escaping XSS and SQLInjection
-            $emailaddress = stripslashes(htmlspecialchars(trim(mysqli_real_escape_string($db,$this->email)))); //Escaping XSS and SQLInjection
+            $password = hexdec(stripslashes(htmlspecialchars(trim(mysqli_real_escape_string($db,$this->pass)))));
+            $emailaddress = stripslashes(htmlspecialchars(trim(mysqli_real_escape_string($db,$this->email))));
             $query = "SELECT * FROM customer WHERE email = '$emailaddress' AND password = '$password'";
             $q = mysqli_query($db,$query);
             if (mysqli_num_rows($q) == 0) {
@@ -25,10 +24,11 @@
             }
             else {
                 @session_start();
-                $_SESSION['account_email'] = $emailaddress; //Creates the Sessions of user account
+                $_SESSION['account_email'] = $emailaddress;
                 while ($rr = mysqli_fetch_array($q)) {
                     $_SESSION['user_name'] = $rr['name'];
                 }
+                header('location:https://www.247naijaforum.com/ecommerce/index.php');
             }
         }
     }
@@ -47,10 +47,10 @@
 			$dbpassword = 'danielpatrick';
 			$database = 'naijafo7_dstore';
 			$db = mysqli_connect($host,$user,$dbpassword,$database);
-    		$password = hexdec(stripslashes(htmlspecialchars(trim(mysqli_real_escape_string($db,$this->password))))); //Escaping XSS and SQLInjection
-    		$emailaddress = stripslashes(htmlspecialchars(trim(mysqli_real_escape_string($db,$this->email)))); //Escaping XSS and SQLInjection
-    		$firstname = stripslashes(htmlspecialchars(trim(mysqli_real_escape_string($db,$this->firstname)))); //Escaping XSS and SQLInjection
-    		$lastname = stripslashes(htmlspecialchars(trim(mysqli_real_escape_string($db,$this->lastname)))); //Escaping XSS and SQLInjection
+    		$password = hexdec(stripslashes(htmlspecialchars(trim(mysqli_real_escape_string($db,$this->password)))));
+    		$emailaddress = stripslashes(htmlspecialchars(trim(mysqli_real_escape_string($db,$this->email))));
+    		$firstname = stripslashes(htmlspecialchars(trim(mysqli_real_escape_string($db,$this->firstname))));
+    		$lastname = stripslashes(htmlspecialchars(trim(mysqli_real_escape_string($db,$this->lastname))));
     		$name = $firstname." ".$lastname;
     		$query = "SELECT * FROM customer WHERE email = '$emailaddress'";
     		$q = mysqli_query($db,$query);
@@ -63,6 +63,7 @@
                 @session_start();
                 $_SESSION['account_email'] = $emailaddress;
                 $_SESSION['user_name'] = $name;
+                header('location:https://www.247naijaforum.com/ecommerce/index.php');
     	    }
     	}
     }
@@ -72,7 +73,7 @@
             $this->off =$off;
             $this->cat = $cat;
             $this->dep = $dep;
-            if ($this->dep != 'default' && $this->cat == 'default') { //Fetches by the Department filter
+            if ($this->dep != 'default' && $this->cat == 'default') {
                 $host = 'localhost';
                 $user = 'naijafo7_root';
                 $dbpassword = 'danielpatrick';
@@ -129,7 +130,7 @@
                     }
                 } 
             }
-            elseif ($this->cat != 'default' && $this->dep == 'default') { //Filters by the Category
+            elseif ($this->cat != 'default' && $this->dep == 'default') {
                 $host = 'localhost';
                 $user = 'naijafo7_root';
                 $dbpassword = 'danielpatrick';
@@ -181,7 +182,7 @@
                             }
                     }
             }
-            else { //Default product Fetch
+            else {
                 $host = 'localhost';
                 $user = 'naijafo7_root';
                 $dbpassword = 'danielpatrick';
@@ -393,7 +394,7 @@
             }
        }
     }
-    class PrintArray { //This takes the Array of the Cashout Details
+    class PrintArray {
         public $arr = '';
         function __construct($arr) {
             $this->arr =  $arr;
@@ -491,7 +492,7 @@
             <?php
         }
     }
-    class fetchPrice { //Fetches the Product prices gievn the ID
+    class fetchPrice {
         public $id = '';
         public function __construct($id) {
             $this->id = $id;
@@ -505,7 +506,7 @@
             echo $price;
         }
     }
-    class SuccessfulPayment { //Validates Payment and adds details to orders table
+    class SuccessfulPayment {
         public $price = '';
         public $ref = '';
         function __construct($paid,$ref) {
@@ -600,7 +601,7 @@
             mysqli_query($db, "UPDATE orders SET charge = '$cost' WHERE customer_id = '$em' AND order_id = '$this->id'");
         }
     }
-    class SearchProduct { //Handles searches
+    class SearchProduct {
         public $qstr = '';
         public function __construct($qstr) {
             $this->qstr = $qstr;
