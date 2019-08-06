@@ -1,3 +1,5 @@
+/* The err() function is a function meant to toggle a div that stores the message. The parameters parsed are message
+i.e err(message) and it pops out, displaying the given message */
 var head = document.querySelectorAll('.head');
 var field = document.querySelectorAll('.field');
 function _(elem) {
@@ -153,6 +155,7 @@ function fin() {
         document.querySelectorAll("#error")[0].style.display = 'none';
     },500);
 }
+//Handles payment messages
 function errr(message) {
     document.querySelectorAll("#error")[0].style.display = 'block';
     document.querySelectorAll("#error")[0].innerHTML = '<center>'+message+'</center>';
@@ -176,6 +179,7 @@ function finn() {
 }
 
 var s = 0;
+//Slider toggler
 function slider() {
     if (s == 0) {
         document.querySelectorAll(".slideout")[0].style.opacity = '1';
@@ -188,6 +192,7 @@ function slider() {
         s = 0;
     }
 }
+//Sends the login details
 function login() {
     if (_("c2").value == '' || _("d2").value == '') {
         err("No field must be left blank!");
@@ -215,6 +220,7 @@ function login() {
         xhttp.send(data);
     }
 }
+//Parses the search data to the back-end
 function searchnow(x) {
     department = 'default';
     category = 'default';
