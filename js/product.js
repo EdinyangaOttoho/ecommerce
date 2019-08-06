@@ -1,4 +1,4 @@
-var total = 0;
+var total = 0; //Integral variable to hold to total price in cart
 function upprice(x) {
 	var id = x.match(/[0-9]+$/) [0];
 	var quant = "yy" + id;
@@ -12,10 +12,10 @@ function upprice(x) {
 	var tot = 0;
 	for (var i = 0; i < document.querySelectorAll(".price-tags").length; i++) {
 		if (document.querySelectorAll('.price-tags')[i].innerText != 'FREE') {
-			tot = tot + parseFloat(document.querySelectorAll(".price-tags")[i].innerHTML.replace('$',''));
+			tot = tot + parseFloat(document.querySelectorAll(".price-tags")[i].innerHTML.replace('$','')); //Replaces the dollar sign and leaves the amount
 		}
 	}
-	tot = tot.toFixed(2);
+	tot = tot.toFixed(2); //Rounds the total to two decimal places
 	_("total").innerText = 'Total: $'+tot;
 	total = tot;
 }
@@ -26,7 +26,7 @@ function totalbuy(x) {
 	else {
 		x = parseFloat(x);
 	}
-	if (x == 0) {
+	if (x == 0) { //This checks if the product is FREE or not
 	   var xhttp;
        if (XMLHttpRequest) {
             xhttp = new XMLHttpRequest();
