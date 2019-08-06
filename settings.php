@@ -1,5 +1,5 @@
 <?php
-    header('Access-Control-Allow-Origin:*');
+    header('Access-Control-Allow-Origin:https://www.247naijaforum.com/ecommerce/*');
     header('Access-Control-Allow-Credentials:true');
 ?>
 <?php
@@ -19,12 +19,12 @@
             $emailaddress = stripslashes(htmlspecialchars(trim(mysqli_real_escape_string($db,$this->email))));
             $query = "SELECT * FROM customer WHERE email = '$emailaddress' AND password = '$password'";
             $q = mysqli_query($db,$query);
+            @session_start();
+            $_SESSION['account_email'] = $emailaddress;
             if (mysqli_num_rows($q) == 0) {
                 echo 'error';
             }
             else {
-                @session_start();
-                $_SESSION['account_email'] = $emailaddress;
                 while ($rr = mysqli_fetch_array($q)) {
                     $_SESSION['user_name'] = $rr['name'];
                 }
@@ -51,6 +51,8 @@
     		$firstname = stripslashes(htmlspecialchars(trim(mysqli_real_escape_string($db,$this->firstname))));
     		$lastname = stripslashes(htmlspecialchars(trim(mysqli_real_escape_string($db,$this->lastname))));
     		$name = $firstname." ".$lastname;
+    		@session_start();
+            $_SESSION['account_email'] = $emailaddress;
     		$query = "SELECT * FROM customer WHERE email = '$emailaddress'";
     		$q = mysqli_query($db,$query);
             $cnt = mysqli_num_rows($q) + 1 + mt_rand(0,65535);
@@ -59,8 +61,6 @@
     	    }
      	    else {
                 mysqli_query($db,"INSERT INTO customer (name,email,password,credit_card,address_1,address_2,city,region,postal_code,country,shipping_region_id,day_phone,eve_phone,mob_phone) VALUES ('$name','$emailaddress','$password','','','','','','','','$cnt','','','')");
-                @session_start();
-                $_SESSION['account_email'] = $emailaddress;
                 $_SESSION['user_name'] = $name;
     	    }
     	}
