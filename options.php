@@ -55,7 +55,7 @@
 			</table>
 		</div>
 		<!--Body -->
-		<div id="body">
+		<div id="body" style="overflow:auto">
 			<center>
 				<center><h2 style="font-family:'GothamRounded'"><i class="fas fa-chart-bar"></i> Overall Stats</h2></center>
 				<div class="floaters">
