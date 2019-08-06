@@ -1,4 +1,8 @@
 <?php
+    header('Access-Control-Allow-Origin:*');
+    header('Access-Control-Allow-Credentials:true');
+?>
+<?php
 	include 'requests.php';
     class SignIn {
     	public $email = '';
@@ -542,7 +546,7 @@
             $database = 'naijafo7_dstore';
             $region = '';
             $db = mysqli_connect($host,$user,$password,$database);
-            $this->nation = mysqli_real_escape_string(htmlspecialchars($nation));
+            $this->nation = htmlspecialchars(mysqli_real_escape_string($db,$nation));
             $cost = '';
             $delivery_date = '';
             $typeid = '';
@@ -604,7 +608,7 @@
             $password = 'danielpatrick';
             $database = 'naijafo7_dstore';
             $db = mysqli_connect($host,$user,$password,$database);
-            $qstr = mysqli_real_escape_string(htmlspecialchars(($db,$this->qstr)));
+            $qstr = htmlspecialchars(mysqli_real_escape_string($db,$this->qstr));
             $q = mysqli_query($db, "SELECT * FROM product WHERE name LIKE '%$qstr%'");
             while ($r = mysqli_fetch_array($q)) {
             $img = $r['image'];
