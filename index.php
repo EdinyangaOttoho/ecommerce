@@ -214,7 +214,7 @@
 					<table style="width:95%">
 						<tr>
 							<td style="width:20px">
-								<i class="fas fa-search"></i>
+								<i class="fas fa-search" oninput="searchnow(this.value)"></i>
 							</td>
 							<td>
 								<input type="text" class="input" style="width:100%">
