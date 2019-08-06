@@ -1,12 +1,14 @@
-var offset = 1;
-var price = 'default';
-var category = 'default';
-var department = 'default';
+//This handles the fetching and display of the different filters and products on the screen
+//----------------------------------------------------------------------------------------------------
+var offset = 1; //For the offset index of the LIMIT SQL function
+var price = 'default'; //Default price value when not filtered
+var category = 'default'; //Default category value when not filtered
+var department = 'default';//Default department value when not filtered
 function getOffset(x) {
     offset = x;
     fetchData();
 }
-function reduce() {
+function reduce() {//Handles the previous arrow by reducing offset by 9 per click
     if (offset >= 10) {
         offset = offset - 9;
         fetchData();
@@ -15,7 +17,7 @@ function reduce() {
         fetchData();
     }
 }
-function increase() {
+function increase() {//Handles the previous arrow by increasing offset by 9 per click
     if (offset <= 92) {
         offset = offset + 9;
         fetchData();
@@ -24,7 +26,8 @@ function increase() {
         fetchData();
     }
 }
-function fetchData() {
+function fetchData() { //Parses the data filters and fetch data to the back-end
+/* This block serves for highlighting the appropriate pagination number boxes */
     if (offset == 1) {
         for (var i = 0; i < document.querySelectorAll(".click").length;i++) {
             document.querySelectorAll(".click")[i].style.backgroundColor = 'white';
@@ -110,12 +113,14 @@ function fetchData() {
     xhttp.send();
 }
 function cat(x) {
+    //Sets the category filter
     department = 'default';
     _("navigator").style.display ='none';
     category = x;
     fetchData();
 }
 function dep(x) {
+    //Sets the department filter
     category = 'default';
     if (x == '1') {
         _("category").style.display = 'block';
